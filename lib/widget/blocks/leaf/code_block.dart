@@ -10,10 +10,15 @@ import 'package:markdown_widget/markdown_widget.dart';
 ///An indented code block is composed of one or more indented chunks separated by blank lines
 ///A code fence is a sequence of at least three consecutive backtick characters (`) or tildes (~)
 class CodeBlockNode extends ElementNode {
-  CodeBlockNode(this.content, this.preConfig);
+  CodeBlockNode(
+    this.content,
+    this.preConfig,
+    this.language,
+  );
 
   final String content;
   final PreConfig preConfig;
+  final String? language;
 
   @override
   InlineSpan build() {
@@ -33,7 +38,7 @@ class CodeBlockNode extends ElementNode {
             return ProxyRichText(TextSpan(
               children: highLightSpans(
                 currentContent,
-                language: preConfig.language,
+                language: language ?? preConfig.language,
                 theme: preConfig.theme,
                 textStyle: style,
                 styleNotMatched: preConfig.styleNotMatched,
@@ -44,7 +49,12 @@ class CodeBlockNode extends ElementNode {
       ),
     );
     return WidgetSpan(
-        child: preConfig.wrapper?.call(widget, content) ?? widget);
+        child: preConfig.wrapper?.call(
+              widget,
+              content,
+              language ?? preConfig.language,
+            ) ??
+            widget);
   }
 
   @override
@@ -175,4 +185,5 @@ class PreConfig implements LeafConfig {
   String get tag => MarkdownTag.pre.name;
 }
 
-typedef CodeWrapper = Widget Function(Widget child, String code);
+typedef CodeWrapper = Widget Function(
+    Widget child, String code, String? language);

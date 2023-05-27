@@ -103,8 +103,25 @@ class WidgetVisitor implements m.NodeVisitor {
         UlOrOLNode(e.tag, e.attributes, config.li),
     MarkdownTag.blockquote.name: (e, config, visitor) =>
         BlockquoteNode(config.blockquote),
-    MarkdownTag.pre.name: (e, config, visitor) =>
-        CodeBlockNode(e.textContent, config.pre),
+    MarkdownTag.pre.name: (e, config, visitor) {
+      String? language;
+      final children = e.children;
+      if (children != null) {
+        for (final child in children) {
+          if (child is m.Element && child.tag == MarkdownTag.code.name) {
+            language = child.attributes['class']?.substring(
+              'language-'.length,
+            );
+            break;
+          }
+        }
+      }
+      return CodeBlockNode(
+        e.textContent,
+        config.pre,
+        language,
+      );
+    },
     MarkdownTag.hr.name: (e, config, visitor) => HrNode(config.hr),
     MarkdownTag.table.name: (e, config, visitor) => TableNode(config),
     MarkdownTag.thead.name: (e, config, visitor) => THeadNode(config),
